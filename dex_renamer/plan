@@ -38,8 +38,59 @@ string_ids_off + string_data_off which is an address in data.
 if we want to keep with section then we find every string like so:
 data[string_ids_off + string_data_off - data_off]
 
+listing is done. now writing.
+
 
 put them back together
+- how do we do this cleanly?
+    - new file? can have option for that.
+        - going to have to make a nice interface for that...
+    - maybe should have stuck with C#, could make pretty excel things like before...
+    - large guy gets annoying...2200+ strings. nobody wants to scroll through that much...
+    
+    - how about do it like the good old days:
+        - dump list into file (maintain format)
+        - user manually edits file
+        - apply patch to original dex
+        - good god has it been 10 years or what this is the shit i pulled back then...
+            - do it better?
+            - how comfortable am i really to edit shit in memory...
+                - pretty sure that would only make it redundant (reparse on every edit)
+                - pretty sure that would only make it more clunky (ugly command for every edit)
+    
+    - why not both? -^(o.o)^-
+    - interface to do modifications, to do everything, e.g.:
+        - l <filename>        - load file
+        - g                   - get strings
+        - r <index> <name>    - rename index i with name (automatically preserve package path?)
+        - s <find> <replace>  - search and replace instances of find with replace.
+        - d <filename>        - dump strings file
+        - p <filename>        - patch with strings file.
+        - save                - apply all patches, recalculate sha1/checksum.
+    - do we want all these functions to create a patch slowly and apply at end?
+    - or do we want r and s to write to file immediately?
+    
+    - how is patching going to work?
+        - small patches made by r/s
+        - big patches made by p.
+        -> same method. 
+            - header never needs to change. same number of things, same spots...?
+            - is data always at the end? might change things?
+            - fuck that, header may need to change, at end of patch. (checksum, sig too)
+            - ext_header > get_strings > s/r > modify_strings (repoints) > apply_patch.
+            - struct for modifications? 
+                - StringPatch(orig_string_item, new_string_item)
+            modify_strings:
+                - change string item.
+                - go through every other string item, if pointer is greater,
+                    then repoint. bump is constant. iterate for bigger patch.
+                - keep track of max bump for all
+                - use max bump to bump header values
+                - recalculate sha1
+                - recalculate checksum.
+       
+
+
 rebuild header file with recalculated pointers.
 reclaculate checksum
 recalculate sha1 signature.

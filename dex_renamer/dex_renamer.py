@@ -14,29 +14,28 @@ Section = collections.namedtuple('Section',
 )
 
 
-# ptr_ind vs ptr_off
-# absolute off? relative off?
-# for now just get index and relative_off
-# data_off is relative offset
-String = collections.namedtuple('String', 
-  'ptr_ind ptr_val data_off data_len data_val'
+
+# ptr stuff is string table details. value and INDEX (not offset)
+# str stuff is data stuff. str_off is RELATIVE OFFSET
+StringItem = collections.namedtuple('String', 
+  'ptr_ind ptr_val str_off str_len str_val'
 )
 
 def main() :
   parser = argparse.ArgumentParser(description='Unpack a .dex')
   parser.add_argument('-f', '--foo', dest='dexfile', action='store',
                       help='path to dex file')
-  argdata = parser.parse_args(sys.argv[1:])
+  argdata = parser.parse_args(sys.argv[1:]) # python *.py arg1 arg2
   
   with open(argdata.dexfile, 'rw+') as f:
     header = ext_header(f)
     endian = True
     string_ids = ext_section(f, header.string_ids_size, header.string_ids_off )
     data       = ext_section(f, header.data_size      , header.data_off       )
-    get_strings_alt(string_ids, data)
+    strings = get_strings(string_ids, data)
   
 
-def get_strings_alt(string_sec, data_sec):
+def get_strings(string_sec, data_sec):
   num_strings = endian_to_dec(string_sec.orig_size)/4
   print "\n%s" % num_strings
   strings = []
@@ -48,25 +47,11 @@ def get_strings_alt(string_sec, data_sec):
     str_len = struct.unpack('B',data_sec.data[data_off:data_off+1])[0]
     #print str_len
     data_str = data_sec.data[data_off+2:data_off+str_len+2]
-    print "%d - %d: %s" % (i, str_len, data_str)
-    #str = String(ptr_ind=i, ptr_val=ptr_val, )
-    
-  return 0
-    
-    
-def get_strings(f, header):
-  f.seek(endian_to_dec(header.string_ids_off))
-  num_strings = endian_to_dec(header.string_ids_size) / 4
-  strings = []
-  for i in range(0, num_strings):
-    str = String(ptr_ind=i,ptr_off=4*i,ptr_val=f.read(4))
-    
-    
-    
-    
-  
-
-    
+    print "%d: %s" % (i, data_str) # write this to a file
+    str = StringItem(ptr_ind=i, ptr_val=ptr_val, str_off=data_off, str_len=str_len, str_val=data_str)
+    strings.append(str)
+  return strings
+        
 def ext_section(f, size, offset):
   f.seek(endian_to_dec(offset))
   return Section(orig_size=size, orig_off=offset, data=f.read(endian_to_dec(size)))
