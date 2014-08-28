@@ -1,0 +1,47 @@
+header_item
+magic 8
+checksum 4
+signature 20
+file_size 4
+header_size 4
+endian_tag 4
+link_size 4
+link_off 4
+map_off 4
+string_ids_size 4
+string_ids_off 4
+type_ids_size 4
+type_ids_off 4
+proto_ids_size 4
+proto_ids_off 4
+field_ids_size 4
+field_ids_off 4
+method_ids_size 4
+metod_ids_off 4
+class_defs_size 4
+class_defs_off 4
+data_size 4
+data_off 4
+112 bytes
+strings start at 0x70
+need to change everything 0x38 and up.
+repoint all offsets accordingly.
+
+so, load all section offsets and lengths.
+Done
+
+work wiht them individually
+problem: all of them point to somewhere in data folder, not necessarily chronological order.
+need absolute offset of all of them.
+every string is findable via: 
+string_ids_off + string_data_off which is an address in data.
+if we want to keep with section then we find every string like so:
+data[string_ids_off + string_data_off - data_off]
+
+
+put them back together
+rebuild header file with recalculated pointers.
+reclaculate checksum
+recalculate sha1 signature.
+
+
