@@ -61,7 +61,7 @@ put them back together
     - why not both? -^(o.o)^-
     - interface to do modifications, to do everything, e.g.:
         - l <filename>        - load file
-        - g                   - get strings
+        - g                   - get/display strings
         - r <index> <name>    - rename index i with name (automatically preserve package path?)
         - s <find> <replace>  - search and replace instances of find with replace.
         - d <filename>        - dump strings file
